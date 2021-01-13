@@ -19,14 +19,24 @@ const { COPYFILE_EXCL } = fs.constants;
         const page = await context.newPage();
 
         try {
-            await page.goto(`file:${path.join(__dirname, `${fileName}`)}`);
+            await page.goto(`file:${path.join(__dirname, `../template/${fileName}`)}`);
         } catch (error) {
             console.log(error);
-            console.log(`${fileName} crashed!`);
-            fs.copyFile(fileName, '../crash/crash_' + fileName, COPYFILE_EXCL, (err) => {
-                if (err) throw err;
-                console.log("Copying file succeed.");
-            })
+            console.log(error.name);
+            if (error.name === "TimeoutError") {
+                console.log(`${type}: ${fileName} timeout!`);
+                fs.copyFile(path.join(__dirname, `../template/${fileName}`), '../timeout/hang_' + fileName, COPYFILE_EXCL, (err) => {
+                    if (err) throw err;
+                    console.log("Copying file succeed.");
+                })
+            }
+            else {
+                console.log(`${type}: ${fileName} crashed!`);
+                fs.copyFile(path.join(__dirname, `../template/${fileName}`), '../crash/crash_' + fileName, COPYFILE_EXCL, (err) => {
+                    if (err) throw err;
+                    console.log("Copying file succeed.");
+                })
+            }
         }
 
         await browser.close();
